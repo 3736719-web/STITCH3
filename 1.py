@@ -1,74 +1,74 @@
-import datetime
+import customtkinter as ctk
 
-# Функция для расчёта скидки
-def apply_discount(price, discount_percent):
-    discount_amount = price * (discount_percent / 100)
-    final_price = price - discount_amount
-    if final_price < 0:
-        final_price = 0
-    return final_price
+ctk.set_appearance_mode("dark")
+ctk.set_default_color_theme("blue")
 
-# Функция для проверки возраста
-def is_adult(age):
-    if age >= 18:
-        return True
-    else:
-        return False
+root = ctk.CTk()
+root.title("Менеджер целей")
+root.geometry("1000x600")
 
-# Список товаров с разными данными
-products = [
-    {"name": "Apple", "price": 100, "stock": 10},
-    {"name": "Banana", "price": "50", "stock": 5},      # цена строкой
-    {"name": "Cherry", "price": 75, "stock": -3},       # отрицательный остаток
-    {"name": "Date", "price": None, "stock": 2},        # цена отсутствует
-    {"name": "Elderberry", "stock": 4},                 # нет цены
-    {"name": "Fig", "price": 80, "count": 6},           # ключ count вместо stock
-]
+header_frame = ctk.CTkFrame(root, fg_color="transparent")
+header_frame.pack(fill="x", padx=20, pady=20)
 
-# Переменная для общей суммы
-total_sum = 0
+title_label = ctk.CTkLabel(
+    header_frame,
+    text="Мои напоминания",
+    font=ctk.CTkFont(size=24, weight="bold")
+)
+title_label.pack(anchor="w")
 
-# Цикл по товарам с обработкой ошибок
-for product in products:
-    try:
-        # Попытка получить цену и остаток с проверкой на наличие ключа
-        price = product.get("price")
-        if price is None:
-            print(f"Товар {product['name']}: отсутствует цена, пропуск")
-            continue
+subtitle_label = ctk.CTkLabel(
+    header_frame,
+    text="Управляй своими целями и задачами",
+    font=ctk.CTkFont(size=14),
+    text_color="gray"
+)
+subtitle_label.pack(anchor="w", pady=(5, 0))
+
+scroll_frame = ctk.CTkScrollableFrame(root)
+scroll_frame.pack(fill="both", expand=True, padx=20, pady=(0, 80))
+
+def button_event():
+    entry = ctk.CTkEntry(scroll_frame, placeholder_text="Введите цель...", width=300)
+    entry.pack(pady=5, padx=10, anchor="w")
+    entry.focus()
+
+    def create_checkbox(event=None):
+        goal_text = entry.get().strip()
         
-        stock = product.get("stock")
-        if stock is None:
-            print(f"Товар {product['name']}: отсутствует остаток, пропуск")
-            continue
-        
-        # Преобразование цены в число
-        price_float = float(price)
-        
-        # Применение скидки
-        discounted_price = apply_discount(price_float, 10)
-        
-        # Расчёт стоимости партии
-        cost = discounted_price * stock
-        
-        # Добавление стоимости к общей сумме
-        total_sum += cost
-        
-        # Вывод информации о товаре
-        print(f"Товар: {product['name']}, Цена: {price_float}, Остаток: {stock}")
-    except ValueError:
-        print(f"Ошибка: Некорректная цена для товара {product['name']}")
-    except Exception as e:
-        print(f"Произошла ошибка: {e}")
+        if goal_text:
+            entry.destroy()
+            
+            check_var = ctk.StringVar(value="off")
+            
+            def checkbox_event():
+                if check_var.get() == "on":
+                    checkbox.destroy()
 
-# Вычисление налога (предполагаем, что tax_rate определена ранее)
-tax_rate = 10  # примерная ставка налога
-tax_amount = calculate_tax(total_sum, tax_rate)
+            checkbox = ctk.CTkCheckBox(
+                scroll_frame, 
+                text=goal_text, 
+                command=checkbox_event,
+                variable=check_var, 
+                onvalue="on", 
+                offvalue="off"
+            )
+            checkbox.pack(pady=5, padx=10, anchor="w")
+        else:
+            entry.destroy() 
 
-# Вывод итоговой суммы
-print(f"Итоговая сумма: {total_sum}")
-print(f"Финальная сумма с налогом: {total_sum + tax_amount}")
+    entry.bind("<Return>", create_checkbox)
 
-# Проверка возраста (логическая ошибка в вызове исправлена)
-age_check = is_adult(25)  # передана корректная числовая величина
-print(f"Проверка возраста: {age_check}")
+
+button = ctk.CTkButton(
+    root, 
+    text="+", 
+    width=50, 
+    height=50, 
+    font=("Arial", 24, "bold"),
+    corner_radius=25,
+    command=button_event
+)
+button.place(relx=1.0, rely=1.0, x=-30, y=-30, anchor="se")
+
+root.mainloop()
